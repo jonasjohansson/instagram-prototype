@@ -46,9 +46,32 @@ function render() {
   grid.innerHTML = '';
 
   state.grid.forEach((slot, index) => {
+    const div = document.createElement('div');
+
+    // Drag-and-drop handlers (shared by empty and filled slots)
+    div.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      div.classList.add('drag-over');
+    });
+    div.addEventListener('dragleave', () => {
+      div.classList.remove('drag-over');
+    });
+    div.addEventListener('drop', (e) => {
+      e.preventDefault();
+      div.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (!file || !file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        state.grid[index] = ev.target.result;
+        saveState();
+        render();
+      };
+      reader.readAsDataURL(file);
+    });
+
     if (slot === null) {
       // Empty slot
-      const div = document.createElement('div');
       div.className = 'grid-slot-empty';
       div.addEventListener('click', () => {
         const input = document.createElement('input');
@@ -67,10 +90,8 @@ function render() {
         });
         input.click();
       });
-      grid.appendChild(div);
     } else {
       // Image slot
-      const div = document.createElement('div');
       div.className = 'grid-item';
 
       const img = document.createElement('img');
@@ -87,9 +108,9 @@ function render() {
         render();
       });
       div.appendChild(removeBtn);
-
-      grid.appendChild(div);
     }
+
+    grid.appendChild(div);
   });
 
   // Update posts count

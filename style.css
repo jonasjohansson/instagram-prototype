@@ -387,6 +387,38 @@ a {
   background: #efefef;
 }
 
+/* Drag-over feedback */
+.grid-item.drag-over,
+.grid-slot-empty.drag-over {
+  outline: 2px solid #0095f6;
+  outline-offset: -2px;
+  background: rgba(0, 149, 246, 0.05);
+}
+
+/* Remove button on filled slots */
+.grid-item-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 16px;
+  line-height: 24px;
+  text-align: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+  padding: 0;
+  border: none;
+}
+
+.grid-item:hover .grid-item-remove {
+  opacity: 1;
+}
+
 .grid-slot-empty::after {
   content: "+";
   font-size: 28px;
