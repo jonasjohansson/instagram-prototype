@@ -1,0 +1,432 @@
+/* === CSS Reset === */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: #fafafa;
+  color: #262626;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+a {
+  text-decoration: none;
+  color: #00376b;
+}
+
+/* === Toolbar === */
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border-bottom: 1px solid #dbdbdb;
+  padding: 12px 20px;
+}
+
+.toolbar-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.view-toggle {
+  display: flex;
+  border: 1px solid #dbdbdb;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.toggle-btn {
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #8e8e8e;
+  background: #ffffff;
+  transition: background 0.2s, color 0.2s;
+}
+
+.toggle-btn.active {
+  background: #0095f6;
+  color: #ffffff;
+}
+
+/* === Shell === */
+.ig-shell {
+  margin: 0 auto;
+  padding: 30px 20px 60px;
+  background: #ffffff;
+  min-height: calc(100vh - 53px);
+  transition: max-width 0.3s ease;
+}
+
+.ig-shell[data-view="desktop"] {
+  max-width: 935px;
+}
+
+.ig-shell[data-view="mobile"] {
+  max-width: 375px;
+}
+
+/* === Profile Header — Desktop === */
+.ig-shell[data-view="desktop"] .profile-header {
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+  padding: 20px 0 20px;
+}
+
+.ig-shell[data-view="desktop"] .profile-pic-wrapper {
+  flex-shrink: 0;
+  width: 150px;
+  display: flex;
+  justify-content: center;
+}
+
+.ig-shell[data-view="desktop"] .profile-pic {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #dbdbdb;
+  background: #efefef;
+  cursor: pointer;
+}
+
+.ig-shell[data-view="desktop"] .profile-info {
+  flex: 1;
+}
+
+/* === Profile Header — Mobile === */
+.ig-shell[data-view="mobile"] .profile-header {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 16px 0;
+}
+
+.ig-shell[data-view="mobile"] .profile-header > .profile-pic-wrapper {
+  display: none;
+}
+
+.ig-shell[data-view="mobile"] .profile-top-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.ig-shell[data-view="mobile"] .profile-top-row::before {
+  content: "";
+  display: block;
+  width: 77px;
+  height: 77px;
+  border-radius: 50%;
+  background: #efefef;
+  border: 1px solid #dbdbdb;
+  flex-shrink: 0;
+}
+
+.ig-shell[data-view="mobile"] .profile-pic-wrapper {
+  display: none;
+}
+
+.ig-shell[data-view="mobile"] .profile-pic {
+  width: 77px;
+  height: 77px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #dbdbdb;
+  background: #efefef;
+  cursor: pointer;
+}
+
+.ig-shell[data-view="mobile"] .profile-stats {
+  order: -1;
+  flex: 1;
+}
+
+/* === Username === */
+.username {
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* === Profile Stats === */
+.profile-stats {
+  display: flex;
+  flex-direction: row;
+  gap: 28px;
+  margin: 16px 0;
+  font-size: 16px;
+}
+
+.stat {
+  color: #262626;
+}
+
+.stat-count {
+  font-weight: 600;
+}
+
+/* === Bio === */
+.profile-bio {
+  margin-bottom: 16px;
+}
+
+.display-name {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.bio-text {
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.website-link {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #00376b;
+  line-height: 1.4;
+}
+
+.threads-handle {
+  font-size: 14px;
+  color: #8e8e8e;
+  line-height: 1.4;
+}
+
+/* === Profile Actions === */
+.profile-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 7px 16px;
+  background: #efefef;
+  color: #262626;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  text-align: center;
+  transition: background 0.15s;
+}
+
+.action-btn:hover {
+  background: #dbdbdb;
+}
+
+/* === Highlights === */
+.highlights {
+  display: flex;
+  gap: 16px;
+  padding: 16px 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.highlights::-webkit-scrollbar {
+  display: none;
+}
+
+.highlight-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.highlight-circle {
+  width: 77px;
+  height: 77px;
+  border-radius: 50%;
+  border: 1px solid #dbdbdb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  cursor: pointer;
+}
+
+.highlight-plus {
+  font-size: 32px;
+  font-weight: 300;
+  color: #8e8e8e;
+  line-height: 1;
+}
+
+.highlight-label {
+  font-size: 12px;
+  color: #262626;
+  max-width: 66px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* Highlight with gradient ring */
+.highlight-circle.has-story {
+  border: none;
+  background: linear-gradient(135deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5);
+  padding: 2px;
+}
+
+.highlight-circle.has-story img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 3px solid #ffffff;
+  object-fit: cover;
+}
+
+/* === Tab Bar === */
+.tab-bar {
+  display: flex;
+  justify-content: space-evenly;
+  border-top: 1px solid #dbdbdb;
+  padding: 0;
+}
+
+.tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 0;
+  color: #8e8e8e;
+  border-top: 1px solid transparent;
+  margin-top: -1px;
+  transition: color 0.15s;
+}
+
+.tab-btn.active {
+  color: #262626;
+  border-top-color: #262626;
+}
+
+.tab-btn:hover {
+  color: #262626;
+}
+
+/* === Grid — Desktop === */
+.ig-shell[data-view="desktop"] .grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  padding: 4px 0;
+}
+
+/* === Grid — Mobile === */
+.ig-shell[data-view="mobile"] .grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  padding: 3px 0;
+}
+
+/* === Grid Items === */
+.grid-item {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  position: relative;
+  background: #efefef;
+}
+
+.grid-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Grid empty slot */
+.grid-slot-empty {
+  aspect-ratio: 1 / 1;
+  border: 2px dashed #dbdbdb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.grid-slot-empty:hover {
+  border-color: #8e8e8e;
+  background: #efefef;
+}
+
+.grid-slot-empty::after {
+  content: "+";
+  font-size: 28px;
+  font-weight: 300;
+  color: #8e8e8e;
+}
+
+/* === Contenteditable === */
+[contenteditable] {
+  outline: none;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+[contenteditable]:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[contenteditable]:focus {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* === Grid Controls === */
+.grid-controls {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px 0;
+}
+
+.control-btn {
+  padding: 8px 20px;
+  background: #efefef;
+  color: #262626;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.control-btn:hover {
+  background: #dbdbdb;
+}

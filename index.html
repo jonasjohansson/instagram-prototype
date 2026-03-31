@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instagram Prototype</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="toolbar">
+    <h2 class="toolbar-title">Instagram Prototype</h2>
+    <div class="view-toggle">
+      <button class="toggle-btn active" data-view="desktop">Desktop</button>
+      <button class="toggle-btn" data-view="mobile">Mobile</button>
+    </div>
+  </div>
+
+  <div class="ig-shell" data-view="desktop">
+
+    <header class="profile-header">
+      <div class="profile-pic-wrapper">
+        <img class="profile-pic" src="" alt="Profile picture">
+        <input type="file" id="profile-pic-input" accept="image/*" hidden>
+      </div>
+
+      <div class="profile-info">
+        <div class="profile-top-row">
+          <h1 class="username" contenteditable="true">username</h1>
+        </div>
+
+        <div class="profile-stats">
+          <div class="stat"><span class="stat-count" id="posts-count">0</span> posts</div>
+          <div class="stat"><span class="stat-count" contenteditable="true">1,234</span> followers</div>
+          <div class="stat"><span class="stat-count" contenteditable="true">567</span> following</div>
+        </div>
+
+        <div class="profile-bio">
+          <div class="display-name" contenteditable="true">Display Name</div>
+          <div class="bio-text" contenteditable="true">Bio goes here
+Add multiple lines</div>
+          <a class="website-link" contenteditable="true">example.com</a>
+          <div class="threads-handle" contenteditable="true">@threads_handle</div>
+        </div>
+
+        <div class="profile-actions">
+          <button class="action-btn">Edit profile</button>
+          <button class="action-btn">View archive</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="highlights">
+      <div class="highlight-item highlight-new">
+        <div class="highlight-circle">
+          <span class="highlight-plus">+</span>
+        </div>
+        <span class="highlight-label">New</span>
+      </div>
+    </section>
+
+    <nav class="tab-bar">
+      <button class="tab-btn active" data-tab="grid" aria-label="Posts">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+          <rect x="1" y="1" width="10" height="10" rx="1" />
+          <rect x="13" y="1" width="10" height="10" rx="1" />
+          <rect x="1" y="13" width="10" height="10" rx="1" />
+          <rect x="13" y="13" width="10" height="10" rx="1" />
+        </svg>
+      </button>
+      <button class="tab-btn" data-tab="reels" aria-label="Reels">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="2" width="20" height="20" rx="2" />
+          <line x1="2" y1="8" x2="22" y2="8" />
+          <line x1="8" y1="2" x2="12" y2="8" />
+          <line x1="14" y1="2" x2="18" y2="8" />
+          <polygon points="10,12 10,20 17,16" fill="currentColor" stroke="none" />
+        </svg>
+      </button>
+      <button class="tab-btn" data-tab="saved" aria-label="Saved">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M5 2h14a1 1 0 011 1v19l-8-5-8 5V3a1 1 0 011-1z" />
+        </svg>
+      </button>
+      <button class="tab-btn" data-tab="tagged" aria-label="Tagged">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="2" width="20" height="20" rx="2" />
+          <circle cx="12" cy="10" r="3" />
+          <path d="M6 21v-1a6 6 0 0112 0v1" />
+        </svg>
+      </button>
+    </nav>
+
+    <div id="grid" class="grid"></div>
+
+    <div class="grid-controls">
+      <button class="control-btn" id="add-row">Add row</button>
+      <button class="control-btn" id="remove-row">Remove row</button>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
