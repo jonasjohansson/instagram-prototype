@@ -358,10 +358,7 @@ async function openPostDetail(index) {
 
 // ── View Toggle ───────────────────────────────────────────────
 function updateSidebarVisibility(view) {
-  const sidebar = document.querySelector('.ig-sidebar');
-  if (sidebar) {
-    sidebar.style.display = view === 'mobile' ? 'none' : '';
-  }
+  // Sidebar removed — no-op kept for compatibility
 }
 
 function initViewToggle() {
