@@ -331,6 +331,45 @@ function editHighlight(index) {
   }
 }
 
+// ── Grid Row Controls ────────────────────────────────────────
+function getColumnsPerRow() {
+  return state.view === 'mobile' ? 3 : 4;
+}
+
+function initGridControls() {
+  const addBtn = document.getElementById('add-row');
+  const removeBtn = document.getElementById('remove-row');
+
+  if (addBtn) {
+    addBtn.addEventListener('click', () => {
+      const cols = getColumnsPerRow();
+      for (let i = 0; i < cols; i++) {
+        state.grid.push(null);
+      }
+      saveState();
+      render();
+    });
+  }
+
+  if (removeBtn) {
+    removeBtn.addEventListener('click', () => {
+      const cols = getColumnsPerRow();
+      if (state.grid.length < cols) return;
+
+      const tail = state.grid.slice(-cols);
+      const hasImages = tail.some((entry) => entry !== null);
+
+      if (hasImages) {
+        if (!confirm('The last row contains images. Remove anyway?')) return;
+      }
+
+      state.grid.splice(-cols, cols);
+      saveState();
+      render();
+    });
+  }
+}
+
 // ── Bootstrap ─────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   loadState();
@@ -338,6 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initProfilePic();
   initViewToggle();
   initInlineEditing();
+  initGridControls();
   renderHighlights();
   render();
 });
