@@ -220,14 +220,25 @@ function populateFromState() {
 }
 
 // ── Profile Picture Upload ────────────────────────────────────
+function syncAllProfilePics(src) {
+  document.querySelectorAll('.profile-pic').forEach((img) => {
+    img.src = src;
+  });
+}
+
 function initProfilePic() {
   const wrapper = document.querySelector('.profile-pic-wrapper');
   const input = document.getElementById('profile-pic-input');
-  const img = document.querySelector('.profile-pic');
+  const mobileImg = document.querySelector('.profile-pic-mobile-img');
 
-  if (!wrapper || !input || !img) return;
+  if (!wrapper || !input) return;
 
   wrapper.addEventListener('click', () => input.click());
+
+  // Also allow clicking mobile pic to upload
+  if (mobileImg) {
+    mobileImg.addEventListener('click', () => input.click());
+  }
 
   input.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -235,7 +246,7 @@ function initProfilePic() {
     const reader = new FileReader();
     reader.onload = (ev) => {
       state.profile.picture = ev.target.result;
-      img.src = ev.target.result;
+      syncAllProfilePics(ev.target.result);
       saveState();
     };
     reader.readAsDataURL(file);
@@ -243,7 +254,7 @@ function initProfilePic() {
 
   // Restore saved picture
   if (state.profile.picture) {
-    img.src = state.profile.picture;
+    syncAllProfilePics(state.profile.picture);
   }
 }
 

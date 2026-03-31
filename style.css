@@ -111,13 +111,18 @@ a {
   height: 150px;
   border-radius: 50%;
   object-fit: cover;
-  border: 1px solid #dbdbdb;
+  border: 2px solid #dbdbdb;
   background: #efefef;
   cursor: pointer;
 }
 
 .ig-shell[data-view="desktop"] .profile-info {
   flex: 1;
+}
+
+/* Hide mobile-only pic in desktop */
+.ig-shell[data-view="desktop"] .profile-pic-mobile {
+  display: none;
 }
 
 /* === Profile Header — Mobile === */
@@ -131,29 +136,24 @@ a {
   display: none;
 }
 
+.ig-shell[data-view="mobile"] .profile-info {
+  display: grid;
+  grid-template-columns: 77px 1fr;
+  grid-template-rows: auto auto;
+  gap: 0 16px;
+}
+
 .ig-shell[data-view="mobile"] .profile-top-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 12px;
+  display: contents;
 }
 
-.ig-shell[data-view="mobile"] .profile-top-row::before {
-  content: "";
-  display: block;
-  width: 77px;
-  height: 77px;
-  border-radius: 50%;
-  background: #efefef;
-  border: 1px solid #dbdbdb;
-  flex-shrink: 0;
+.ig-shell[data-view="mobile"] .profile-pic-mobile {
+  grid-row: 1;
+  grid-column: 1;
+  align-self: center;
 }
 
-.ig-shell[data-view="mobile"] .profile-pic-wrapper {
-  display: none;
-}
-
-.ig-shell[data-view="mobile"] .profile-pic {
+.ig-shell[data-view="mobile"] .profile-pic-mobile-img {
   width: 77px;
   height: 77px;
   border-radius: 50%;
@@ -163,9 +163,24 @@ a {
   cursor: pointer;
 }
 
+/* Hide username on mobile (shown in toolbar instead) */
+.ig-shell[data-view="mobile"] .profile-top-row .username {
+  display: none;
+}
+
 .ig-shell[data-view="mobile"] .profile-stats {
-  order: -1;
-  flex: 1;
+  grid-row: 1;
+  grid-column: 2;
+  align-self: center;
+  font-size: 14px;
+  gap: 16px;
+  margin: 0;
+  justify-content: space-around;
+}
+
+.ig-shell[data-view="mobile"] .profile-bio,
+.ig-shell[data-view="mobile"] .profile-actions {
+  grid-column: 1 / -1;
 }
 
 /* === Username === */
@@ -179,7 +194,7 @@ a {
 .profile-stats {
   display: flex;
   flex-direction: row;
-  gap: 28px;
+  gap: 40px;
   margin: 16px 0;
   font-size: 16px;
 }
@@ -244,6 +259,22 @@ a {
 
 .action-btn:hover {
   background: #dbdbdb;
+}
+
+/* Mobile bio full width */
+.ig-shell[data-view="mobile"] .profile-bio {
+  width: 100%;
+  margin-top: 12px;
+}
+
+/* Mobile action buttons: full width, smaller padding */
+.ig-shell[data-view="mobile"] .profile-actions {
+  margin-top: 12px;
+}
+
+.ig-shell[data-view="mobile"] .action-btn {
+  padding: 5px 8px;
+  font-size: 13px;
 }
 
 /* === Highlights === */
