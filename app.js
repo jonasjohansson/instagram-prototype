@@ -52,22 +52,41 @@ function render() {
     div.addEventListener('dragover', (e) => {
       e.preventDefault();
       div.classList.add('drag-over');
+      div.classList.add('drag-target');
     });
     div.addEventListener('dragleave', () => {
       div.classList.remove('drag-over');
+      div.classList.remove('drag-target');
     });
     div.addEventListener('drop', (e) => {
       e.preventDefault();
       div.classList.remove('drag-over');
-      const file = e.dataTransfer.files[0];
-      if (!file || !file.type.startsWith('image/')) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        state.grid[index] = ev.target.result;
-        saveState();
-        render();
-      };
-      reader.readAsDataURL(file);
+      div.classList.remove('drag-target');
+
+      // External file drop
+      if (e.dataTransfer.files.length > 0) {
+        const file = e.dataTransfer.files[0];
+        if (!file || !file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          state.grid[index] = ev.target.result;
+          saveState();
+          render();
+        };
+        reader.readAsDataURL(file);
+        return;
+      }
+
+      // Internal rearrange
+      const sourceIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+      if (isNaN(sourceIndex) || sourceIndex === index) return;
+
+      // Swap source and target (works for move-to-empty and swap)
+      const temp = state.grid[sourceIndex];
+      state.grid[sourceIndex] = state.grid[index];
+      state.grid[index] = temp;
+      saveState();
+      render();
     });
 
     if (slot === null) {
@@ -93,6 +112,15 @@ function render() {
     } else {
       // Image slot
       div.className = 'grid-item';
+      div.draggable = true;
+
+      div.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', index);
+        div.classList.add('dragging');
+      });
+      div.addEventListener('dragend', () => {
+        div.classList.remove('dragging');
+      });
 
       const img = document.createElement('img');
       img.src = slot;

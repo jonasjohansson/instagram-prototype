@@ -395,6 +395,17 @@ a {
   background: rgba(0, 149, 246, 0.05);
 }
 
+/* Drag visual feedback */
+.grid-item.dragging {
+  opacity: 0.4;
+}
+
+.grid-item.drag-target,
+.grid-slot-empty.drag-target {
+  outline: 2px solid #0095f6;
+  outline-offset: -2px;
+}
+
 /* Remove button on filled slots */
 .grid-item-remove {
   position: absolute;
