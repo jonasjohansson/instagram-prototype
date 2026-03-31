@@ -600,7 +600,7 @@ a {
 
 /* Grid slot cursors */
 .grid-item {
-  cursor: grab;
+  cursor: pointer;
 }
 
 .grid-item.dragging {

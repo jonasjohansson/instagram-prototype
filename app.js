@@ -2,14 +2,14 @@
 const DEFAULT_STATE = {
   profile: {
     picture: '',  // IndexedDB image key or empty
-    username: 'username',
-    displayName: 'Display Name',
-    category: 'Category',
-    bio: 'Bio goes here...',
-    website: 'website.com',
-    threads: '@threads',
-    followers: 0,
-    following: 0,
+    username: 'yourhandle',
+    displayName: 'Your Name',
+    category: 'Artist',
+    bio: 'Creative mind. Making things happen.\nBased in Stockholm 🇸🇪',
+    website: 'yourwebsite.com',
+    threads: '@yourhandle',
+    followers: '1,234',
+    following: '567',
   },
   grid: Array(9).fill(null),  // null or IndexedDB image key string
   highlights: [],             // { name, cover: imageKey }
@@ -188,10 +188,20 @@ async function render() {
       img.src = url;
       div.appendChild(img);
 
-      // Click to open post detail
-      div.addEventListener('click', (e) => {
-        if (e.target.closest('.grid-item-remove')) return;
-        openPostDetail(index);
+      // Click to open post detail (use mousedown/mouseup to distinguish from drag)
+      let mouseDownPos = null;
+      div.addEventListener('mousedown', (e) => {
+        mouseDownPos = { x: e.clientX, y: e.clientY };
+      });
+      div.addEventListener('mouseup', (e) => {
+        if (!mouseDownPos) return;
+        const dx = Math.abs(e.clientX - mouseDownPos.x);
+        const dy = Math.abs(e.clientY - mouseDownPos.y);
+        mouseDownPos = null;
+        // Only open if it wasn't a drag and not the remove button
+        if (dx < 5 && dy < 5 && !e.target.closest('.grid-item-remove')) {
+          openPostDetail(index);
+        }
       });
 
       const removeBtn = document.createElement('button');
