@@ -1,7 +1,7 @@
 // ── Default State ──────────────────────────────────────────────
 const DEFAULT_STATE = {
   profile: {
-    picture: '',
+    picture: '',  // IndexedDB image key or empty
     username: 'username',
     displayName: 'Display Name',
     category: 'Category',
@@ -11,12 +11,70 @@ const DEFAULT_STATE = {
     followers: 0,
     following: 0,
   },
-  grid: Array(9).fill(null),
-  highlights: [],
+  grid: Array(9).fill(null),  // null or IndexedDB image key string
+  highlights: [],             // { name, cover: imageKey }
   view: 'desktop',
 };
 
 let state;
+let db; // IndexedDB reference
+const objectURLCache = new Map(); // imageKey → objectURL
+
+// ── IndexedDB Image Store ────────────────────────────────────
+function openImageDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('ig-prototype-images', 1);
+    req.onupgradeneeded = () => {
+      req.result.createObjectStore('images');
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function storeImage(file) {
+  return new Promise((resolve, reject) => {
+    const key = 'img_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+    const tx = db.transaction('images', 'readwrite');
+    tx.objectStore('images').put(file, key);
+    tx.oncomplete = () => resolve(key);
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+function getImage(key) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('images', 'readonly');
+    const req = tx.objectStore('images').get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function deleteImage(key) {
+  if (!key) return;
+  const tx = db.transaction('images', 'readwrite');
+  tx.objectStore('images').delete(key);
+  if (objectURLCache.has(key)) {
+    URL.revokeObjectURL(objectURLCache.get(key));
+    objectURLCache.delete(key);
+  }
+}
+
+async function getImageURL(key) {
+  if (!key) return '';
+  if (objectURLCache.has(key)) return objectURLCache.get(key);
+  const blob = await getImage(key);
+  if (!blob) return '';
+  const url = URL.createObjectURL(blob);
+  objectURLCache.set(key, url);
+  return url;
+}
+
+// Helper: read a File into a stored image key
+async function storeFileAsImage(file) {
+  return storeImage(file);
+}
 
 // ── Persistence ───────────────────────────────────────────────
 function loadState() {
@@ -24,7 +82,6 @@ function loadState() {
     const raw = localStorage.getItem('ig-prototype-state');
     if (raw) {
       state = JSON.parse(raw);
-      // Ensure all keys exist (forward-compat)
       state.profile = { ...DEFAULT_STATE.profile, ...state.profile };
       state.grid = state.grid || Array(9).fill(null);
       state.highlights = state.highlights || [];
@@ -41,16 +98,17 @@ function saveState() {
   try {
     localStorage.setItem('ig-prototype-state', JSON.stringify(state));
   } catch (e) {
-    alert('Storage full — images may not persist. Try removing some images.');
+    console.warn('localStorage save failed', e);
   }
 }
 
 // ── Grid Rendering ────────────────────────────────────────────
-function render() {
+async function render() {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
 
-  state.grid.forEach((slot, index) => {
+  for (let index = 0; index < state.grid.length; index++) {
+    const slot = state.grid[index];
     const div = document.createElement('div');
 
     // Drag-and-drop handlers (shared by empty and filled slots)
@@ -63,7 +121,7 @@ function render() {
       div.classList.remove('drag-over');
       div.classList.remove('drag-target');
     });
-    div.addEventListener('drop', (e) => {
+    div.addEventListener('drop', async (e) => {
       e.preventDefault();
       div.classList.remove('drag-over');
       div.classList.remove('drag-target');
@@ -72,13 +130,12 @@ function render() {
       if (e.dataTransfer.files.length > 0) {
         const file = e.dataTransfer.files[0];
         if (!file || !file.type.startsWith('image/')) return;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          state.grid[index] = ev.target.result;
-          saveState();
-          render();
-        };
-        reader.readAsDataURL(file);
+        const oldKey = state.grid[index];
+        if (oldKey) deleteImage(oldKey);
+        const key = await storeFileAsImage(file);
+        state.grid[index] = key;
+        saveState();
+        render();
         return;
       }
 
@@ -86,7 +143,6 @@ function render() {
       const sourceIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
       if (isNaN(sourceIndex) || sourceIndex === index) return;
 
-      // Swap source and target (works for move-to-empty and swap)
       const temp = state.grid[sourceIndex];
       state.grid[sourceIndex] = state.grid[index];
       state.grid[index] = temp;
@@ -104,16 +160,13 @@ function render() {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'image/*';
-        input.addEventListener('change', (e) => {
+        input.addEventListener('change', async (e) => {
           const file = e.target.files[0];
           if (!file) return;
-          const reader = new FileReader();
-          reader.onload = (ev) => {
-            state.grid[index] = ev.target.result;
-            saveState();
-            render();
-          };
-          reader.readAsDataURL(file);
+          const key = await storeFileAsImage(file);
+          state.grid[index] = key;
+          saveState();
+          render();
         });
         input.click();
       });
@@ -131,14 +184,22 @@ function render() {
       });
 
       const img = document.createElement('img');
-      img.src = slot;
+      const url = await getImageURL(slot);
+      img.src = url;
       div.appendChild(img);
+
+      // Click to open post detail
+      div.addEventListener('click', (e) => {
+        if (e.target.closest('.grid-item-remove')) return;
+        openPostDetail(index);
+      });
 
       const removeBtn = document.createElement('button');
       removeBtn.className = 'grid-item-remove';
       removeBtn.textContent = '×';
       removeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+        deleteImage(state.grid[index]);
         state.grid[index] = null;
         saveState();
         render();
@@ -147,13 +208,142 @@ function render() {
     }
 
     grid.appendChild(div);
-  });
+  }
 
   // Update posts count
   const postsCount = document.getElementById('posts-count');
   if (postsCount) {
     postsCount.textContent = state.grid.filter((s) => s !== null).length;
   }
+}
+
+// ── Post Detail Modal ───────────────────────────────────────
+async function openPostDetail(index) {
+  const key = state.grid[index];
+  if (!key) return;
+  const url = await getImageURL(key);
+  const profilePicURL = state.profile.picture ? await getImageURL(state.profile.picture) : '';
+  const isMobile = state.view === 'mobile';
+
+  const overlay = document.createElement('div');
+  overlay.className = 'post-modal-overlay' + (isMobile ? ' mobile' : '');
+
+  // Close button
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'post-modal-close';
+  closeBtn.innerHTML = '&times;';
+  closeBtn.addEventListener('click', () => overlay.remove());
+
+  const modal = document.createElement('div');
+  modal.className = 'post-modal' + (isMobile ? ' mobile' : '');
+
+  const avatarHTML = profilePicURL
+    ? `<img src="${profilePicURL}" class="post-modal-avatar-img">`
+    : `<div class="post-modal-avatar-placeholder"></div>`;
+
+  const fakeComments = [
+    { user: 'user1', text: '🔥', likes: 2 },
+    { user: 'user2', text: '❤️', likes: 1 },
+    { user: 'user3', text: '🙌🙌', likes: 2 },
+    { user: 'user4', text: '🔥', likes: 1 },
+    { user: 'user5', text: '👏👏', likes: 1 },
+  ];
+
+  const commentsHTML = fakeComments.map(c => `
+    <div class="post-comment">
+      <div class="post-comment-avatar"></div>
+      <div class="post-comment-content">
+        <span class="post-comment-user">${c.user}</span> ${c.text}
+        <div class="post-comment-meta">3v &middot; ${c.likes} gilla-markeringar &middot; Svara</div>
+      </div>
+      <button class="post-comment-like">♡</button>
+    </div>
+  `).join('');
+
+  if (isMobile) {
+    // Mobile: stacked layout
+    modal.innerHTML = `
+      <div class="post-modal-mobile-header">
+        <button class="post-modal-back">&lsaquo;</button>
+        <span>Inlägg</span>
+        <span></span>
+      </div>
+      <div class="post-modal-mobile-author">
+        <div class="post-modal-avatar">${avatarHTML}</div>
+        <span class="post-modal-username">${state.profile.username}</span>
+        <span class="post-modal-dots">&hellip;</span>
+      </div>
+      <div class="post-modal-image"><img src="${url}"></div>
+      <div class="post-modal-actions">
+        <div class="post-modal-actions-left">
+          <svg viewBox="0 0 24 24" width="24" height="24"><path d="M16.792 3.904A4.989 4.989 0 0121.5 9.122c0 3.072-2.652 4.959-5.197 7.222-2.512 2.243-3.865 3.469-4.303 3.752-.477-.309-2.143-1.823-4.303-3.752C5.141 14.072 2.5 12.167 2.5 9.122a4.989 4.989 0 014.708-5.218 4.21 4.21 0 013.675 1.941c.84 1.175.98 1.763 1.12 1.763s.278-.588 1.11-1.766a4.17 4.17 0 013.679-1.938z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          <svg viewBox="0 0 24 24" width="24" height="24"><path d="M20.656 17.008a9.993 9.993 0 10-3.59 3.615L22 22z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 24 24" width="24" height="24"><line x1="22" y1="3" x2="9.218" y2="10.083" fill="none" stroke="currentColor" stroke-width="2"/><polygon points="22,3 15,22 11,13 2,9" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        </div>
+        <svg viewBox="0 0 24 24" width="24" height="24"><path d="M5,2 L19,2 L19,22 L12,17 L5,22 Z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </div>
+      <div class="post-modal-likes">357 gilla-markeringar</div>
+      <div class="post-modal-caption">
+        <strong>${state.profile.username}</strong> Caption goes here...
+        <span class="post-modal-more">mer</span>
+      </div>
+      <div class="post-modal-view-comments">Visa alla 6 kommentarer</div>
+      <div class="post-modal-date">den 6 mars</div>
+    `;
+    modal.querySelector('.post-modal-back').addEventListener('click', () => overlay.remove());
+  } else {
+    // Desktop: side-by-side layout
+    modal.innerHTML = `
+      <div class="post-modal-image"><img src="${url}"></div>
+      <div class="post-modal-info">
+        <div class="post-modal-header">
+          <div class="post-modal-avatar">${avatarHTML}</div>
+          <span class="post-modal-username">${state.profile.username}</span>
+          <span class="post-modal-dots">&hellip;</span>
+        </div>
+        <div class="post-modal-comments-area">
+          <div class="post-comment post-caption-comment">
+            <div class="post-modal-avatar">${avatarHTML}</div>
+            <div class="post-comment-content">
+              <span class="post-comment-user">${state.profile.username}</span> Caption goes here...
+              <div class="post-comment-meta">3v</div>
+            </div>
+          </div>
+          ${commentsHTML}
+        </div>
+        <div class="post-modal-actions">
+          <div class="post-modal-actions-left">
+            <svg viewBox="0 0 24 24" width="24" height="24"><path d="M16.792 3.904A4.989 4.989 0 0121.5 9.122c0 3.072-2.652 4.959-5.197 7.222-2.512 2.243-3.865 3.469-4.303 3.752-.477-.309-2.143-1.823-4.303-3.752C5.141 14.072 2.5 12.167 2.5 9.122a4.989 4.989 0 014.708-5.218 4.21 4.21 0 013.675 1.941c.84 1.175.98 1.763 1.12 1.763s.278-.588 1.11-1.766a4.17 4.17 0 013.679-1.938z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            <svg viewBox="0 0 24 24" width="24" height="24"><path d="M20.656 17.008a9.993 9.993 0 10-3.59 3.615L22 22z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+            <svg viewBox="0 0 24 24" width="24" height="24"><line x1="22" y1="3" x2="9.218" y2="10.083" fill="none" stroke="currentColor" stroke-width="2"/><polygon points="22,3 15,22 11,13 2,9" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          </div>
+          <svg viewBox="0 0 24 24" width="24" height="24"><path d="M5,2 L19,2 L19,22 L12,17 L5,22 Z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        </div>
+        <div class="post-modal-likes">357 gilla-markeringar</div>
+        <div class="post-modal-date">den 6 mars</div>
+        <div class="post-modal-add-comment">
+          <span class="post-modal-emoji">☺</span>
+          <input type="text" placeholder="Lägg till kommentar..." disabled>
+          <button class="post-modal-publish">Publicera</button>
+        </div>
+      </div>
+    `;
+  }
+
+  overlay.appendChild(closeBtn);
+  overlay.appendChild(modal);
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
+  document.addEventListener('keydown', function escHandler(e) {
+    if (e.key === 'Escape') {
+      overlay.remove();
+      document.removeEventListener('keydown', escHandler);
+    }
+  });
+
+  document.body.appendChild(overlay);
 }
 
 // ── View Toggle ───────────────────────────────────────────────
@@ -283,7 +473,7 @@ function syncAllProfilePics(src) {
   });
 }
 
-function initProfilePic() {
+async function initProfilePic() {
   const wrapper = document.querySelector('.profile-pic-wrapper');
   const input = document.getElementById('profile-pic-input');
 
@@ -291,30 +481,29 @@ function initProfilePic() {
 
   wrapper.addEventListener('click', () => input.click());
 
-  // Also allow clicking mobile pic wrapper (including placeholder) to upload
   const mobileWrapper = document.querySelector('.profile-pic-mobile');
   if (mobileWrapper) {
     mobileWrapper.addEventListener('click', () => input.click());
   }
 
-  input.addEventListener('change', (e) => {
+  input.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      state.profile.picture = ev.target.result;
-      syncAllProfilePics(ev.target.result);
-      saveState();
-    };
-    reader.readAsDataURL(file);
+    if (state.profile.picture) deleteImage(state.profile.picture);
+    const key = await storeFileAsImage(file);
+    state.profile.picture = key;
+    const url = await getImageURL(key);
+    syncAllProfilePics(url);
+    saveState();
   });
 
-  // Restore saved picture (also sets placeholder visibility)
-  syncAllProfilePics(state.profile.picture || '');
+  // Restore saved picture
+  const url = state.profile.picture ? await getImageURL(state.profile.picture) : '';
+  syncAllProfilePics(url);
 }
 
 // ── Story Highlights ─────────────────────────────────────────
-function renderHighlights() {
+async function renderHighlights() {
   const container = document.querySelector('.highlights');
   if (!container) return;
   container.innerHTML = '';
@@ -331,8 +520,8 @@ function renderHighlights() {
   newItem.addEventListener('click', addHighlight);
   container.appendChild(newItem);
 
-  // Render each highlight from state
-  state.highlights.forEach((hl, index) => {
+  for (let index = 0; index < state.highlights.length; index++) {
+    const hl = state.highlights[index];
     const item = document.createElement('div');
     item.className = 'highlight-item';
 
@@ -340,7 +529,8 @@ function renderHighlights() {
     circle.className = 'highlight-circle has-story';
 
     const img = document.createElement('img');
-    img.src = hl.cover;
+    const url = await getImageURL(hl.cover);
+    img.src = url;
     img.alt = hl.name;
     circle.appendChild(img);
 
@@ -353,7 +543,7 @@ function renderHighlights() {
 
     item.addEventListener('click', () => editHighlight(index));
     container.appendChild(item);
-  });
+  }
 }
 
 function addHighlight() {
@@ -363,16 +553,13 @@ function addHighlight() {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
-  input.addEventListener('change', (e) => {
+  input.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      state.highlights.push({ name, cover: ev.target.result });
-      saveState();
-      renderHighlights();
-    };
-    reader.readAsDataURL(file);
+    const key = await storeFileAsImage(file);
+    state.highlights.push({ name, cover: key });
+    saveState();
+    renderHighlights();
   });
   input.click();
 }
@@ -437,13 +624,14 @@ function initGridControls() {
 }
 
 // ── Bootstrap ─────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  db = await openImageDB();
   loadState();
   populateFromState();
-  initProfilePic();
+  await initProfilePic();
   initViewToggle();
   initInlineEditing();
   initGridControls();
-  renderHighlights();
-  render();
+  await renderHighlights();
+  await render();
 });
