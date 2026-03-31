@@ -37,22 +37,17 @@ function loadState() {
 }
 
 function saveState() {
-  localStorage.setItem('ig-prototype-state', JSON.stringify(state));
+  try {
+    localStorage.setItem('ig-prototype-state', JSON.stringify(state));
+  } catch (e) {
+    alert('Storage full — images may not persist. Try removing some images.');
+  }
 }
 
 // ── Grid Rendering ────────────────────────────────────────────
 function render() {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
-
-  // Empty state: show message when all slots are null
-  const allEmpty = state.grid.every((s) => s === null);
-  if (allEmpty) {
-    const msg = document.createElement('div');
-    msg.className = 'grid-empty-state';
-    msg.textContent = 'Drag images here or click + to upload';
-    grid.appendChild(msg);
-  }
 
   state.grid.forEach((slot, index) => {
     const div = document.createElement('div');
@@ -101,6 +96,9 @@ function render() {
     if (slot === null) {
       // Empty slot
       div.className = 'grid-slot-empty';
+      if (index === 0) {
+        div.title = 'Click or drag image to upload';
+      }
       div.addEventListener('click', () => {
         const input = document.createElement('input');
         input.type = 'file';
@@ -268,15 +266,15 @@ function syncAllProfilePics(src) {
 function initProfilePic() {
   const wrapper = document.querySelector('.profile-pic-wrapper');
   const input = document.getElementById('profile-pic-input');
-  const mobileImg = document.querySelector('.profile-pic-mobile-img');
 
   if (!wrapper || !input) return;
 
   wrapper.addEventListener('click', () => input.click());
 
-  // Also allow clicking mobile pic to upload
-  if (mobileImg) {
-    mobileImg.addEventListener('click', () => input.click());
+  // Also allow clicking mobile pic wrapper (including placeholder) to upload
+  const mobileWrapper = document.querySelector('.profile-pic-mobile');
+  if (mobileWrapper) {
+    mobileWrapper.addEventListener('click', () => input.click());
   }
 
   input.addEventListener('change', (e) => {
@@ -381,7 +379,7 @@ function editHighlight(index) {
 
 // ── Grid Row Controls ────────────────────────────────────────
 function getColumnsPerRow() {
-  return state.view === 'mobile' ? 3 : 4;
+  return 3;
 }
 
 function initGridControls() {
