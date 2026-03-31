@@ -247,6 +247,90 @@ function initProfilePic() {
   }
 }
 
+// ── Story Highlights ─────────────────────────────────────────
+function renderHighlights() {
+  const container = document.querySelector('.highlights');
+  if (!container) return;
+  container.innerHTML = '';
+
+  // "New" button always first
+  const newItem = document.createElement('div');
+  newItem.className = 'highlight-item highlight-new';
+  newItem.innerHTML = `
+    <div class="highlight-circle highlight-circle-new">
+      <span class="highlight-plus">+</span>
+    </div>
+    <span class="highlight-label">New</span>
+  `;
+  newItem.addEventListener('click', addHighlight);
+  container.appendChild(newItem);
+
+  // Render each highlight from state
+  state.highlights.forEach((hl, index) => {
+    const item = document.createElement('div');
+    item.className = 'highlight-item';
+
+    const circle = document.createElement('div');
+    circle.className = 'highlight-circle has-story';
+
+    const img = document.createElement('img');
+    img.src = hl.cover;
+    img.alt = hl.name;
+    circle.appendChild(img);
+
+    const label = document.createElement('span');
+    label.className = 'highlight-label';
+    label.textContent = hl.name;
+
+    item.appendChild(circle);
+    item.appendChild(label);
+
+    item.addEventListener('click', () => editHighlight(index));
+    container.appendChild(item);
+  });
+}
+
+function addHighlight() {
+  const name = prompt('Highlight name:');
+  if (!name) return;
+
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      state.highlights.push({ name, cover: ev.target.result });
+      saveState();
+      renderHighlights();
+    };
+    reader.readAsDataURL(file);
+  });
+  input.click();
+}
+
+function editHighlight(index) {
+  const hl = state.highlights[index];
+  const result = prompt(
+    'Rename highlight (or type DELETE to remove):',
+    hl.name
+  );
+  if (result === null) return; // cancelled
+  if (result.trim().toUpperCase() === 'DELETE') {
+    if (confirm(`Delete highlight "${hl.name}"?`)) {
+      state.highlights.splice(index, 1);
+      saveState();
+      renderHighlights();
+    }
+  } else if (result.trim() !== '') {
+    state.highlights[index].name = result.trim();
+    saveState();
+    renderHighlights();
+  }
+}
+
 // ── Bootstrap ─────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   loadState();
@@ -254,5 +338,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initProfilePic();
   initViewToggle();
   initInlineEditing();
+  renderHighlights();
   render();
 });
