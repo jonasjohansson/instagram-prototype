@@ -35,30 +35,16 @@ a {
 }
 
 /* === Toolbar === */
-.toolbar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #ffffff;
-  border-bottom: 1px solid #dbdbdb;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  padding: 12px 20px;
-}
-
-.toolbar-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #262626;
-}
-
-.view-toggle {
+.view-toggle-float {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 200;
   display: flex;
   border: 1px solid #dbdbdb;
   border-radius: 20px;
   overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .toggle-btn {
@@ -78,7 +64,7 @@ a {
 /* === Left Sidebar === */
 .ig-sidebar {
   position: fixed;
-  top: 53px;
+  top: 0;
   left: 0;
   width: 73px;
   height: calc(100vh - 53px);
@@ -557,9 +543,9 @@ a {
 /* === Grid — Desktop === */
 .ig-shell[data-view="desktop"] .grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 3px;
-  padding: 3px 0;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  padding: 0;
 }
 
 /* === Grid — Mobile === */
@@ -572,7 +558,7 @@ a {
 
 /* === Grid Items === */
 .grid-item {
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 5;
   overflow: hidden;
   position: relative;
   background: #efefef;
@@ -609,7 +595,7 @@ a {
 
 /* Grid empty slot */
 .grid-slot-empty {
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 5;
   border: 2px dashed #dbdbdb;
   display: flex;
   align-items: center;
