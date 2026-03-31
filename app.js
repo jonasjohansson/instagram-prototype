@@ -4,6 +4,7 @@ const DEFAULT_STATE = {
     picture: '',
     username: 'username',
     displayName: 'Display Name',
+    category: 'Category',
     bio: 'Bio goes here...',
     website: 'website.com',
     threads: '@threads',
@@ -156,6 +157,13 @@ function render() {
 }
 
 // ── View Toggle ───────────────────────────────────────────────
+function updateSidebarVisibility(view) {
+  const sidebar = document.querySelector('.ig-sidebar');
+  if (sidebar) {
+    sidebar.style.display = view === 'mobile' ? 'none' : '';
+  }
+}
+
 function initViewToggle() {
   const shell = document.querySelector('.ig-shell');
   const buttons = document.querySelectorAll('.toggle-btn');
@@ -169,6 +177,7 @@ function initViewToggle() {
       buttons.forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
 
+      updateSidebarVisibility(view);
       saveState();
     });
   });
@@ -178,12 +187,14 @@ function initViewToggle() {
   buttons.forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.view === state.view);
   });
+  updateSidebarVisibility(state.view);
 }
 
 // ── Inline Editing Sync ──────────────────────────────────────
 const EDITABLE_MAP = [
   { selector: '.username', field: 'username' },
   { selector: '.display-name', field: 'displayName' },
+  { selector: '.category-label', field: 'category' },
   { selector: '.bio-text', field: 'bio' },
   { selector: '.website-link', field: 'website' },
   { selector: '.threads-handle', field: 'threads' },
@@ -191,7 +202,7 @@ const EDITABLE_MAP = [
 
 function initInlineEditing() {
   // Single-line fields: prevent Enter key
-  const singleLineSelectors = ['.username', '.display-name', '.website-link', '.threads-handle'];
+  const singleLineSelectors = ['.username', '.display-name', '.category-label', '.website-link', '.threads-handle'];
   singleLineSelectors.forEach((sel) => {
     const el = document.querySelector(sel);
     if (!el) return;

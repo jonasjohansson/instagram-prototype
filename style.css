@@ -75,6 +75,58 @@ a {
   color: #ffffff;
 }
 
+/* === Left Sidebar === */
+.ig-sidebar {
+  position: fixed;
+  top: 53px;
+  left: 0;
+  width: 73px;
+  height: calc(100vh - 53px);
+  background: #ffffff;
+  border-right: 1px solid #dbdbdb;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0 20px;
+  z-index: 99;
+}
+
+.sidebar-top,
+.sidebar-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.sidebar-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #262626;
+  transition: background 0.15s;
+}
+
+.sidebar-icon:hover {
+  background: #efefef;
+}
+
+.sidebar-logo {
+  margin-bottom: 12px;
+}
+
+@media (max-width: 767px) {
+  .ig-sidebar {
+    display: none;
+  }
+}
+
 /* === Shell === */
 .ig-shell {
   margin: 0 auto;
@@ -82,22 +134,32 @@ a {
   background: #ffffff;
   min-height: calc(100vh - 53px);
   transition: max-width 0.3s ease;
+  margin-left: 73px;
 }
 
 .ig-shell[data-view="desktop"] {
-  max-width: 935px;
+  max-width: calc(935px + 73px);
+  padding-left: 40px;
+  padding-right: 40px;
 }
 
 .ig-shell[data-view="mobile"] {
   max-width: 375px;
+  margin-left: auto;
+}
+
+@media (max-width: 767px) {
+  .ig-shell {
+    margin-left: 0;
+  }
 }
 
 /* === Profile Header — Desktop === */
 .ig-shell[data-view="desktop"] .profile-header {
   display: flex;
   flex-direction: row;
-  gap: 30px;
-  padding: 20px 0 20px;
+  gap: 40px;
+  padding: 30px 16px 20px;
 }
 
 .ig-shell[data-view="desktop"] .profile-pic-wrapper {
@@ -111,12 +173,46 @@ a {
   position: relative;
 }
 
+/* Gradient ring */
+.profile-pic-gradient-ring {
+  width: 156px;
+  height: 156px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-pic-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #ffffff;
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.profile-pic-gradient-ring-mobile {
+  width: 83px;
+  height: 83px;
+}
+
+.profile-pic-inner-mobile {
+  width: 100%;
+  height: 100%;
+}
+
 .ig-shell[data-view="desktop"] .profile-pic {
-  width: 150px;
-  height: 150px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #dbdbdb;
+  border: none;
   background: #efefef;
   cursor: pointer;
 }
@@ -124,12 +220,12 @@ a {
 /* Profile pic placeholder */
 .profile-pic-placeholder {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 150px;
-  height: 150px;
+  top: 3px;
+  left: 3px;
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
   border-radius: 50%;
-  border: 2px solid #dbdbdb;
+  border: none;
   background: #efefef;
   display: flex;
   align-items: center;
@@ -139,10 +235,12 @@ a {
 }
 
 .profile-pic-placeholder-mobile {
-  width: 77px;
-  height: 77px;
-  border: 1px solid #dbdbdb;
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
+  border: none;
   position: absolute;
+  top: 3px;
+  left: 3px;
 }
 
 .profile-pic-placeholder.has-picture {
@@ -171,7 +269,7 @@ a {
 
 .ig-shell[data-view="mobile"] .profile-info {
   display: grid;
-  grid-template-columns: 77px 1fr;
+  grid-template-columns: 83px 1fr;
   grid-template-rows: auto auto;
   gap: 0 16px;
 }
@@ -188,17 +286,21 @@ a {
 }
 
 .ig-shell[data-view="mobile"] .profile-pic-mobile-img {
-  width: 77px;
-  height: 77px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  border: 1px solid #dbdbdb;
+  border: none;
   background: #efefef;
   cursor: pointer;
 }
 
 /* Hide username on mobile (shown in toolbar instead) */
 .ig-shell[data-view="mobile"] .profile-top-row .username {
+  display: none;
+}
+
+.ig-shell[data-view="mobile"] .username-more {
   display: none;
 }
 
@@ -219,9 +321,35 @@ a {
 
 /* === Username === */
 .username {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 400;
   line-height: 1.4;
+}
+
+.profile-top-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.username-more {
+  cursor: pointer;
+  color: #262626;
+  display: flex;
+  align-items: center;
+  margin-left: 4px;
+}
+
+.username-more:hover {
+  opacity: 0.6;
+}
+
+/* === Category Label === */
+.category-label {
+  font-size: 14px;
+  color: #8e8e8e;
+  line-height: 1.4;
+  font-weight: 400;
 }
 
 /* === Profile Stats === */
@@ -239,6 +367,10 @@ a {
 
 .stat-count {
   font-weight: 600;
+}
+
+.stat-label {
+  font-weight: 400;
 }
 
 /* === Bio === */
@@ -412,9 +544,9 @@ a {
 /* === Grid — Desktop === */
 .ig-shell[data-view="desktop"] .grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-  padding: 4px 0;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  padding: 3px 0;
 }
 
 /* === Grid — Mobile === */
