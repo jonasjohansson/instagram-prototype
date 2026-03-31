@@ -63,6 +63,13 @@
 
   <div class="ig-shell" data-view="desktop">
 
+    <!-- Mobile top bar -->
+    <div class="mobile-top-bar">
+      <button class="mobile-back-btn">&lt;</button>
+      <span class="mobile-top-username">username</span>
+      <span class="mobile-top-spacer"></span>
+    </div>
+
     <header class="profile-header">
       <div class="profile-pic-wrapper">
         <div class="profile-pic-gradient-ring">
@@ -101,9 +108,9 @@
         </div>
 
         <div class="profile-stats">
-          <div class="stat"><span class="stat-count" id="posts-count">0</span> <span class="stat-label">posts</span></div>
-          <div class="stat"><span class="stat-count" contenteditable="true">1,234</span> <span class="stat-label">followers</span></div>
-          <div class="stat"><span class="stat-count" contenteditable="true">567</span> <span class="stat-label">following</span></div>
+          <div class="stat"><span class="stat-count" id="posts-count">0</span><span class="stat-label">inlägg</span></div>
+          <div class="stat"><span class="stat-count" contenteditable="true">11,2 tn</span><span class="stat-label">följare</span></div>
+          <div class="stat"><span class="stat-count" contenteditable="true">567</span><span class="stat-label">följer</span></div>
         </div>
 
         <div class="profile-bio">
@@ -164,6 +171,25 @@ Add multiple lines</div>
       <button class="control-btn" id="add-row">Add row</button>
       <button class="control-btn" id="remove-row">Remove row</button>
     </div>
+
+    <!-- Mobile bottom navigation -->
+    <nav class="mobile-bottom-nav">
+      <button class="bottom-nav-item" aria-label="Home">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M9.005 16.545a2.997 2.997 0 0 1 2.997-2.997A2.997 2.997 0 0 1 15 16.545V22H9.005V16.545ZM12 1.5l-8.5 7.273V22H7V16.545a4.997 4.997 0 0 1 9.995 0V22h3.5V8.773L12 1.5Z"/></svg>
+      </button>
+      <button class="bottom-nav-item" aria-label="Search">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+      </button>
+      <button class="bottom-nav-item" aria-label="Reels">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><polygon points="10,8 10,16 17,12" fill="currentColor" stroke="none"/></svg>
+      </button>
+      <button class="bottom-nav-item" aria-label="Messages">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg>
+      </button>
+      <button class="bottom-nav-item bottom-nav-profile" aria-label="Profile">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+      </button>
+    </nav>
 
   </div>
 

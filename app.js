@@ -232,6 +232,11 @@ function initInlineEditing() {
     if (!el) return;
     el.addEventListener('blur', () => {
       state.profile[field] = el.textContent.trim();
+      // Sync mobile top bar username when username changes
+      if (field === 'username') {
+        const mobileTopUsername = document.querySelector('.mobile-top-username');
+        if (mobileTopUsername) mobileTopUsername.textContent = state.profile.username;
+      }
       saveState();
     });
   });
@@ -261,6 +266,10 @@ function populateFromState() {
   const statCounts = document.querySelectorAll('.stat-count[contenteditable]');
   if (statCounts[0]) statCounts[0].textContent = state.profile.followers;
   if (statCounts[1]) statCounts[1].textContent = state.profile.following;
+
+  // Sync mobile top bar username
+  const mobileTopUsername = document.querySelector('.mobile-top-username');
+  if (mobileTopUsername) mobileTopUsername.textContent = state.profile.username;
 }
 
 // ── Profile Picture Upload ────────────────────────────────────
