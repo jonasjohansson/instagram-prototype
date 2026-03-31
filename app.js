@@ -45,6 +45,15 @@ function render() {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
 
+  // Empty state: show message when all slots are null
+  const allEmpty = state.grid.every((s) => s === null);
+  if (allEmpty) {
+    const msg = document.createElement('div');
+    msg.className = 'grid-empty-state';
+    msg.textContent = 'Drag images here or click + to upload';
+    grid.appendChild(msg);
+  }
+
   state.grid.forEach((slot, index) => {
     const div = document.createElement('div');
 
@@ -183,6 +192,32 @@ const EDITABLE_MAP = [
 ];
 
 function initInlineEditing() {
+  // Single-line fields: prevent Enter key
+  const singleLineSelectors = ['.username', '.display-name', '.website-link', '.threads-handle'];
+  singleLineSelectors.forEach((sel) => {
+    const el = document.querySelector(sel);
+    if (!el) return;
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') e.preventDefault();
+    });
+  });
+
+  // Also prevent Enter on stat-count fields
+  document.querySelectorAll('.stat-count[contenteditable]').forEach((el) => {
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') e.preventDefault();
+    });
+  });
+
+  // Strip HTML on paste for all contenteditable fields
+  document.querySelectorAll('[contenteditable]').forEach((el) => {
+    el.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = e.clipboardData.getData('text/plain');
+      document.execCommand('insertText', false, text);
+    });
+  });
+
   EDITABLE_MAP.forEach(({ selector, field }) => {
     const el = document.querySelector(selector);
     if (!el) return;
@@ -224,6 +259,10 @@ function syncAllProfilePics(src) {
   document.querySelectorAll('.profile-pic').forEach((img) => {
     img.src = src;
   });
+  // Hide/show placeholders based on whether picture exists
+  document.querySelectorAll('.profile-pic-placeholder').forEach((el) => {
+    el.classList.toggle('has-picture', !!src);
+  });
 }
 
 function initProfilePic() {
@@ -252,10 +291,8 @@ function initProfilePic() {
     reader.readAsDataURL(file);
   });
 
-  // Restore saved picture
-  if (state.profile.picture) {
-    syncAllProfilePics(state.profile.picture);
-  }
+  // Restore saved picture (also sets placeholder visibility)
+  syncAllProfilePics(state.profile.picture || '');
 }
 
 // ── Story Highlights ─────────────────────────────────────────

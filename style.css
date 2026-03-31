@@ -44,6 +44,7 @@ a {
   justify-content: space-between;
   background: #ffffff;
   border-bottom: 1px solid #dbdbdb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: 12px 20px;
 }
 
@@ -106,6 +107,10 @@ a {
   justify-content: center;
 }
 
+.ig-shell[data-view="desktop"] .profile-pic-wrapper {
+  position: relative;
+}
+
 .ig-shell[data-view="desktop"] .profile-pic {
   width: 150px;
   height: 150px;
@@ -114,6 +119,34 @@ a {
   border: 2px solid #dbdbdb;
   background: #efefef;
   cursor: pointer;
+}
+
+/* Profile pic placeholder */
+.profile-pic-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 2px solid #dbdbdb;
+  background: #efefef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.profile-pic-placeholder-mobile {
+  width: 77px;
+  height: 77px;
+  border: 1px solid #dbdbdb;
+  position: absolute;
+}
+
+.profile-pic-placeholder.has-picture {
+  display: none;
 }
 
 .ig-shell[data-view="desktop"] .profile-info {
@@ -151,6 +184,7 @@ a {
   grid-row: 1;
   grid-column: 1;
   align-self: center;
+  position: relative;
 }
 
 .ig-shell[data-view="mobile"] .profile-pic-mobile-img {
@@ -405,6 +439,29 @@ a {
   object-fit: cover;
 }
 
+/* Grid hover overlay */
+.grid-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  transition: background 0.15s;
+  pointer-events: none;
+}
+
+.grid-item:hover::after {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Grid slot cursors */
+.grid-item {
+  cursor: grab;
+}
+
+.grid-item.dragging {
+  cursor: grabbing;
+}
+
 /* Grid empty slot */
 .grid-slot-empty {
   aspect-ratio: 1 / 1;
@@ -507,4 +564,16 @@ a {
 
 .control-btn:hover {
   background: #dbdbdb;
+}
+
+/* === Grid Empty State === */
+.grid-empty-state {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #8e8e8e;
+  font-size: 14px;
+  text-align: center;
 }
